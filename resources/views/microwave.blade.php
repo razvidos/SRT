@@ -65,6 +65,7 @@
             <th scope="col">Weight, Gram</th>
             <th scope="col">Power, Watt</th>
             <th scope="col">Time, Seconds</th>
+            <th scope="col">Totally Power, Watt</th>
             <th scope="col">Temperature, *C</th>
         </tr>
         </thead>
@@ -76,9 +77,70 @@
                 <td>{{ $result->weight}}</td>
                 <td>{{ $result->power }}</td>
                 <td>{{ $result->time }}</td>
-                <td>{{ $result->temperature}}</td>
+                <th>{{ $result->totally_power }}</th>
+                <td>{{ $result->temperature }}</td>
             </tr>
         @endforeach
         </tbody>
     </table>
+
+
+    <svg version="1.2" xmlns="http://www.w3.org/2000/svg"
+         class="graph mt-5" aria-labelledby="title" role="img">
+        <title id="title">A line chart showing some information</title>
+        {{--Y--}}
+        <g class="grid x-grid" id="xGrid">
+            <line x1="90" x2="90" y1="5" y2="{{ $mr_diagram->height }}"></line>
+        </g>
+        {{--X--}}
+        <g class="grid y-grid" id="yGrid">
+            <line x1="90" x2="{{ $mr_diagram->width }}" y1="{{ $mr_diagram->height }}"
+                  y2="{{ $mr_diagram->height }}"></line>
+        </g>
+
+
+        {{--X Lables--}}
+        <g class="labels x-labels">
+            <text x="{{ $mr_diagram->width / 2 }}" y="{{ $mr_diagram->height_xLabelTitle }}" class="label-title">
+                {{ $mr_diagram->xLabel }}
+            </text>
+            @foreach($mr_diagram->x as $x => $xPoint)
+                <text x="{{ $x }}" y="{{ $mr_diagram->height_xLabel }}">{{ $xPoint }}</text>
+            @endforeach
+        </g>
+
+        {{--Y Lables--}}
+        <g class="labels y-labels">
+            <text x="50" y="{{$mr_diagram->height / 2}}" class="label-title">{{ $mr_diagram->yLabel }}</text>
+            @foreach($mr_diagram->y as $y => $yPoint)
+                <text x="80" y="{{ $y }}">{{ $yPoint }}</text>
+            @endforeach
+            <text x="80" y="{{$y + 55}}">0</text>
+        </g>
+        {{--Data--}}
+        <g class="data" data-setname="Our first data set">
+            @foreach($microwave_results as $item)
+                <circle
+                    cx="{{ array_search($item->totally_power, $mr_diagram->x->all()) }}"
+                    cy="{{ array_search($item->weight, $mr_diagram->y->all()) }}"
+                    {{--                    data-value="7.2"--}}
+                    r="2">
+                </circle>
+                <text class="text-danger"
+                      x="{{ array_search($item->totally_power, $mr_diagram->x->all()) + 2 }}"
+                      y="{{ array_search($item->weight, $mr_diagram->y->all()) - 2 }}"
+
+                      data-id="{{ $item->product->id }}"
+                      data-product-name="{{ $item->product->name }}"
+                      data-weight="{{ $item->weight }}"
+                      data-time="{{ $item->time }}"
+                      data-totally-power="{{ $item->totally_power }}"
+                      data-temperature="{{ $item->temperature }}"
+                >
+                    {{ $item->temperature }}
+                </text>
+            @endforeach
+
+        </g>
+    </svg>
 @endsection
